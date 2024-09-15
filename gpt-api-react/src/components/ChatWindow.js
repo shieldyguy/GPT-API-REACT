@@ -1,12 +1,12 @@
 // src/components/ChatWindow.js
 import React, { useState } from "react";
 
-function ChatWindow({ chatOutput, sendMessage }) {
+function ChatWindow({ chatOutput, processInput }) {
   const [userInput, setUserInput] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault(); // Prevent form reload on submit
-    sendMessage(userInput);
+    processInput(userInput);
     setUserInput(""); // Clear the input field after sending message
   };
 

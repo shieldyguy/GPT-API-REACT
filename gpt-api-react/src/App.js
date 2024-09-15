@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Sidebar from "./components/Sidebar";
 import ChatWindow from "./components/ChatWindow";
+import { handleCommand } from "./utils/commandHandler";
 import "./styles.css";
 
 function App() {
@@ -40,6 +41,19 @@ function App() {
     } catch (error) {
       console.error("Error fetching models:", error);
     }
+  };
+
+  const processInput = async (userInput) => {
+    // Check if it's a command first
+    const isCommand = handleCommand(userInput, setChatOutput, username);
+
+    // If it was a command, return early and don't send it to ChatGPT
+    if (isCommand) {
+      return;
+    }
+
+    // Otherwise, proceed with sending the message to ChatGPT
+    sendMessage(userInput);
   };
 
   const sendMessage = async (userInput) => {
@@ -105,7 +119,7 @@ function App() {
         models={models}
         totalCost={totalCost}
       />
-      <ChatWindow sendMessage={sendMessage} chatOutput={chatOutput} />
+      <ChatWindow processInput={processInput} chatOutput={chatOutput} />
     </div>
   );
 }
