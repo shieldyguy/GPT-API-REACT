@@ -10,14 +10,16 @@ export const parseCommand = (userInput) => {
     return { type: "roll", sides: diceSides };
   }
 
-  // Command for attacking (e.g., attack)
   if (input === "attack") {
     return { type: "attack" };
   }
 
-  // Command for checking inventory (e.g., check inventory)
   if (input === "check inventory") {
     return { type: "inventory" };
+  }
+
+  if (input === "sleep") {
+    return { type: "sleep" };
   }
 
   // No recognized command, send to ChatGPT

@@ -14,26 +14,36 @@ const checkInventory = () => {
   return "You check your inventory: [potion, sword, shield]";
 };
 
-// Main command handler
+const sleep = () => {
+  return "You sleep.";
+};
+
+// Main command handler, return true if it was a command
 export const handleCommand = (userInput, setChatOutput, username) => {
   const command = parseCommand(userInput);
 
   if (command.type === "roll") {
     const result = rollDice(command.sides);
     setChatOutput((prev) => [...prev, { sender: username, message: result }]);
-    return true; // This signals that it was a command
+    return true;
   }
 
   if (command.type === "attack") {
     const result = attack();
     setChatOutput((prev) => [...prev, { sender: username, message: result }]);
-    return true; // This signals that it was a command
+    return true;
   }
 
   if (command.type === "inventory") {
     const result = checkInventory();
     setChatOutput((prev) => [...prev, { sender: username, message: result }]);
-    return true; // This signals that it was a command
+    return true;
+  }
+
+  if (command.type === "sleep") {
+    const result = sleep();
+    setChatOutput((prev) => [...prev, { sender: username, message: result }]);
+    return true;
   }
 
   // If no command was recognized, return false (to pass it to ChatGPT)
