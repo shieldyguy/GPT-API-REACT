@@ -47,14 +47,6 @@ button {
 }
 
 /* Chat window styles */
-.chat-window {
-  flex-grow: 1;
-  padding: 20px;
-  border-left: 1px solid #ccc;
-  overflow-y: auto;
-  max-width: 75%;
-}
-
 .default-text {
   color: #c5c5c5;
   font-size: medium;
