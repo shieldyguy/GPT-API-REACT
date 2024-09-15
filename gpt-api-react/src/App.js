@@ -27,7 +27,16 @@ function App() {
       });
       if (!response.ok) throw new Error("Network response was not ok");
       const data = await response.json();
-      setModels(data.data || []);
+      const modelList = data.data || [];
+
+      // Set models in state
+      setModels(modelList);
+
+      // Check if "gpt-4o-mini" is available, and set it as the default if so
+      const defaultModel = modelList.find((m) => m.id === "gpt-4o-mini");
+      if (defaultModel) {
+        setModel("gpt-4o-mini");
+      }
     } catch (error) {
       console.error("Error fetching models:", error);
     }
