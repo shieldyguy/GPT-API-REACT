@@ -48,22 +48,6 @@ function Sidebar({
         ))}
       </select>
 
-      <label htmlFor="userInput">Your Query:</label>
-      <textarea
-        id="userInput"
-        placeholder="Enter your query here..."
-        value={userInput}
-        onChange={(e) => setUserInput(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
-          }
-        }}
-      />
-
-      <button onClick={sendMessage}>Send</button>
-
       <div id="apiCost">Total Cost: ${totalCost.toFixed(4)}</div>
     </div>
   );

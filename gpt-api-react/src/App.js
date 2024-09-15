@@ -1,15 +1,13 @@
-// src/App.js
-import React, { useState } from 'react';
-import Sidebar from './components/Sidebar';
-import ChatWindow from './components/ChatWindow';
-import './styles.css';
+import React, { useState } from "react";
+import Sidebar from "./components/Sidebar";
+import ChatWindow from "./components/ChatWindow";
+import "./styles.css";
 
 function App() {
-  const [apiKey, setApiKey] = useState('');
-  const [username, setUsername] = useState('User');
-  const [model, setModel] = useState('');
+  const [apiKey, setApiKey] = useState("");
+  const [username, setUsername] = useState("User");
+  const [model, setModel] = useState("");
   const [models, setModels] = useState([]);
-  const [userInput, setUserInput] = useState('');
   const [chatOutput, setChatOutput] = useState([]);
   const [totalCost, setTotalCost] = useState(0);
 
@@ -22,22 +20,22 @@ function App() {
 
   const fetchModels = async (key) => {
     try {
-      const response = await fetch('https://api.openai.com/v1/models', {
+      const response = await fetch("https://api.openai.com/v1/models", {
         headers: {
           Authorization: `Bearer ${key}`,
         },
       });
-      if (!response.ok) throw new Error('Network response was not ok');
+      if (!response.ok) throw new Error("Network response was not ok");
       const data = await response.json();
       setModels(data.data || []);
     } catch (error) {
-      console.error('Error fetching models:', error);
+      console.error("Error fetching models:", error);
     }
   };
 
-  const sendMessage = async () => {
+  const sendMessage = async (userInput) => {
     if (!apiKey || !userInput) {
-      alert('Please enter your API key and query.');
+      alert("Please enter your API key and query.");
       return;
     }
 
@@ -46,20 +44,19 @@ function App() {
       { sender: username, message: userInput },
     ];
     setChatOutput(newChatOutput);
-    setUserInput('');
 
     try {
       const response = await fetch(
-        'https://api.openai.com/v1/chat/completions',
+        "https://api.openai.com/v1/chat/completions",
         {
-          method: 'POST',
+          method: "POST",
           headers: {
             Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: model || 'gpt-4o-mini',
-            messages: [{ role: 'user', content: userInput }],
+            model: model || "gpt-4o-mini",
+            messages: [{ role: "user", content: userInput }],
           }),
         }
       );
@@ -68,10 +65,10 @@ function App() {
       const result = await response.json();
 
       const assistantMessage =
-        result.choices[0]?.message?.content || 'No response received.';
+        result.choices[0]?.message?.content || "No response received.";
       setChatOutput((prev) => [
         ...prev,
-        { sender: 'ChatGPT', message: assistantMessage },
+        { sender: "ChatGPT", message: assistantMessage },
       ]);
 
       // Update cost (Assuming cost per token is 0.0001 as placeholder)
@@ -79,10 +76,10 @@ function App() {
       const cost = tokensUsed * 0.0001;
       setTotalCost((prev) => prev + cost);
     } catch (error) {
-      console.error('Error during API call:', error);
+      console.error("Error during API call:", error);
       setChatOutput((prev) => [
         ...prev,
-        { sender: 'Error', message: error.message },
+        { sender: "Error", message: error.message },
       ]);
     }
   };
@@ -97,12 +94,9 @@ function App() {
         model={model}
         setModel={setModel}
         models={models}
-        userInput={userInput}
-        setUserInput={setUserInput}
-        sendMessage={sendMessage}
         totalCost={totalCost}
       />
-      <ChatWindow chatOutput={chatOutput} />
+      <ChatWindow sendMessage={sendMessage} chatOutput={chatOutput} />
     </div>
   );
 }
