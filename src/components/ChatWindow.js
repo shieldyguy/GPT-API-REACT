@@ -1,7 +1,7 @@
 // src/components/ChatWindow.js
 import React, { useState } from "react";
 
-function ChatWindow({ chatOutput, processInput }) {
+function ChatWindow({ chatOutput, processInput, isLoading }) {
   const [userInput, setUserInput] = useState("");
 
   const handleSubmit = (e) => {
@@ -25,6 +25,11 @@ function ChatWindow({ chatOutput, processInput }) {
             {chat.message}
           </div>
         ))}
+        {isLoading && (
+          <div className="loading-indicator">
+            <em></em>
+          </div>
+        )}
       </div>
 
       <form className="chat-input-box" onSubmit={handleSubmit}>

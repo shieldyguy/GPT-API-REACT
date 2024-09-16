@@ -17,6 +17,7 @@ function App() {
     { role: "system", content: systemPrompt },
   ]);
   const [summaries, setSummaries] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Fetch models when API key changes
   useEffect(() => {
@@ -42,7 +43,7 @@ function App() {
       // Check if "gpt-4" is available, and set it as the default if so
       const defaultModel = modelList.find((m) => m.id === "gpt-4");
       if (defaultModel) {
-        setModel("gpt-4");
+        setModel("gpt-4o-mini");
       }
     } catch (error) {
       console.error("Error fetching models:", error);
@@ -102,13 +103,14 @@ function App() {
     }
 
     try {
+      setIsLoading(true);
       // Before making the API call, construct the messages array with summaries
       let messages;
 
       if (isSummaryRequest) {
         // For summarization requests, use only the assistant's reply
         const summarizationSystemPrompt =
-          "You are a summarization assistant. Provide a concise summary of the following text, focusing on key events and important information. Do not include unnecessary details.";
+          "You are a summarization assistant. Provide a concise summary of the following text, focusing on key events and important information. Do not include unnecessary details. Your goal is to provide very succinct summarizations in order to preserve context without wasting memory.";
 
         messages = [
           { role: "system", content: summarizationSystemPrompt },
@@ -215,6 +217,8 @@ function App() {
         ]);
       }
       return null;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -229,7 +233,11 @@ function App() {
         setModel={setModel}
         models={models}
       />
-      <ChatWindow processInput={processInput} chatOutput={chatOutput} />
+      <ChatWindow
+        processInput={processInput}
+        chatOutput={chatOutput}
+        isLoading={isLoading}
+      />
     </div>
   );
 }
