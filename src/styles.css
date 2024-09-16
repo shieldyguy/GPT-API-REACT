@@ -104,6 +104,8 @@ button {
 .chat-window {
   flex-grow: 1;
   overflow-y: auto; /* Allows scrolling */
+  overscroll-behavior-y: contain; /* Automatically scroll to the bottom of the chat window */
+  scroll-behavior: smooth;
   background-color: #2e2e2e; /* Dark background for chat */
   color: #f5f5f5;
 }

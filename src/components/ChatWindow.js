@@ -1,14 +1,19 @@
 // src/components/ChatWindow.js
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 function ChatWindow({ chatOutput, processInput, isLoading }) {
   const [userInput, setUserInput] = useState("");
+  const messagesEndRef = useRef(null);
 
   const handleSubmit = (e) => {
     e.preventDefault(); // Prevent form reload on submit
     processInput(userInput);
     setUserInput(""); // Clear the input field after sending message
   };
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatOutput]);
 
   return (
     <div className="chat-container">
@@ -30,6 +35,7 @@ function ChatWindow({ chatOutput, processInput, isLoading }) {
             <em></em>
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       <form className="chat-input-box" onSubmit={handleSubmit}>

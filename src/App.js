@@ -41,7 +41,7 @@ function App() {
       setModels(modelList);
 
       // Check if "gpt-4" is available, and set it as the default if so
-      const defaultModel = modelList.find((m) => m.id === "gpt-4");
+      const defaultModel = modelList.find((m) => m.id === "gpt-4o-mini");
       if (defaultModel) {
         setModel("gpt-4o-mini");
       }
@@ -94,6 +94,7 @@ function App() {
         { role: "user", content: userInput },
       ];
       setConversationHistory(newHistory);
+      console.log("New conversation history:", newHistory);
 
       // Update chat output
       setChatOutput((prev) => [
@@ -110,7 +111,7 @@ function App() {
       if (isSummaryRequest) {
         // For summarization requests, use only the assistant's reply
         const summarizationSystemPrompt =
-          "You are a summarization assistant. Provide a concise summary of the following text, focusing on key events and important information. Do not include unnecessary details. Your goal is to provide very succinct summarizations in order to preserve context without wasting memory.";
+          "You are a summarization assistant. Provide a concise summary of the following text, focusing on key events and important information. Do not include unnecessary details.";
 
         messages = [
           { role: "system", content: summarizationSystemPrompt },
@@ -132,13 +133,20 @@ function App() {
           });
         }
 
-        // Include the last 10 messages from conversation history
-        const recentMessages = conversationHistory.slice(-10); // Last 5 exchanges
+        // Include the last 4 messages from conversation history (last 2 exchanges)
+        const recentMessages = conversationHistory.slice(-4);
         messages.push(...recentMessages);
 
         // Add the new user input
         messages.push({ role: "user", content: userInput });
       }
+
+      // Log the length of the request body
+      console.log(
+        "Request body length:",
+        JSON.stringify({ model: model || "gpt-4o-mini", messages: messages })
+          .length
+      );
 
       const response = await fetch(
         "https://api.openai.com/v1/chat/completions",
@@ -176,9 +184,15 @@ function App() {
         ]);
 
         // Check if we need to summarize older messages
-        if (updatedHistory.length > 12) {
-          // Extract messages older than the last 5 exchanges (each exchange is user and assistant)
-          const messagesToSummarize = updatedHistory.slice(1, -10); // Exclude system prompt and recent messages
+        if (updatedHistory.length > 6) {
+          console.log("Summarization triggered.");
+          console.log(
+            "Conversation history before summarization:",
+            updatedHistory
+          );
+
+          // Extract messages older than the last 2 exchanges
+          const messagesToSummarize = updatedHistory.slice(1, -4); // Exclude system prompt and recent messages
 
           // Create a combined text to summarize
           const textToSummarize = messagesToSummarize
@@ -194,14 +208,19 @@ function App() {
           });
 
           if (summary) {
+            console.log("Summary received:", summary);
             // Add the new summary to the summaries array
             setSummaries((prev) => [...prev, summary]);
 
             // Remove the summarized messages from the conversation history
             const remainingHistory = [
-              conversationHistory[0], // Keep the system prompt
-              ...updatedHistory.slice(-10),
+              updatedHistory[0], // Keep the system prompt
+              ...updatedHistory.slice(-4), // Keep the last 2 exchanges
             ];
+            console.log(
+              "Remaining conversation history after summarization:",
+              remainingHistory
+            );
             setConversationHistory(remainingHistory);
           }
         }
