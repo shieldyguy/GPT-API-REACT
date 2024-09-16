@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Sidebar from "./components/Sidebar";
 import ChatWindow from "./components/ChatWindow";
 import { handleCommand } from "./utils/commandHandler";
+import { systemPrompt } from "./system/systemPrompt";
 import "./styles.css";
 
 function App() {
@@ -79,7 +80,10 @@ function App() {
           },
           body: JSON.stringify({
             model: model || "gpt-4o-mini",
-            messages: [{ role: "user", content: userInput }],
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userInput },
+            ],
           }),
         }
       );

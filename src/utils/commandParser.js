@@ -22,6 +22,10 @@ export const parseCommand = (userInput) => {
     return { type: "sleep" };
   }
 
+  if (input === "gamestate") {
+    return { type: "gamestate" };
+  }
+
   // No recognized command, send to ChatGPT
   return { type: "chatgpt", message: userInput };
 };

@@ -1,5 +1,14 @@
 import { parseCommand } from "./commandParser";
 
+const {
+  updatePlayer,
+  updateWorld,
+  addQuest,
+  completeQuest,
+  addKeyEvent,
+  getGameState,
+} = require("../system/gameState");
+
 // Command functions
 const rollDice = (sides) => {
   const rollResult = Math.floor(Math.random() * sides) + 1;
@@ -16,6 +25,10 @@ const checkInventory = () => {
 
 const sleep = () => {
   return "You sleep.";
+};
+
+const printGameState = () => {
+  return JSON.stringify(getGameState(), null, 1);
 };
 
 // Main command handler, return true if it was a command
@@ -42,6 +55,12 @@ export const handleCommand = (userInput, setChatOutput, username) => {
 
   if (command.type === "sleep") {
     const result = sleep();
+    setChatOutput((prev) => [...prev, { sender: username, message: result }]);
+    return true;
+  }
+
+  if (command.type === "gamestate") {
+    const result = printGameState();
     setChatOutput((prev) => [...prev, { sender: username, message: result }]);
     return true;
   }
