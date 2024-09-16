@@ -1,5 +1,5 @@
 // src/components/Sidebar.js
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 function Sidebar({
   apiKey,
@@ -13,6 +13,17 @@ function Sidebar({
   setUserInput,
   sendMessage,
 }) {
+  const [usernameColor, setUsernameColor] = useState("#000000");
+
+  function updateUsernameColor(color) {
+    document.documentElement.style.setProperty("--username-color", color);
+  }
+
+  const handleColorChange = (event) => {
+    setUsernameColor(event.target.value);
+    updateUsernameColor(event.target.value);
+  };
+
   return (
     <div className="sidebar">
       <h2>ChatGPT API</h2>
@@ -46,6 +57,18 @@ function Sidebar({
           </option>
         ))}
       </select>
+
+      <div id="sidebar">
+        <label htmlFor="colorPicker">Choose Color:</label>
+        <br />
+        <input
+          type="color"
+          id="colorPicker"
+          name="colorPicker"
+          value={usernameColor}
+          onChange={handleColorChange}
+        />
+      </div>
     </div>
   );
 }

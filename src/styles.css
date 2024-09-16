@@ -54,8 +54,12 @@ button {
   line-height: 1.5;
 }
 
+:root {
+  --username-color: #bf4444;
+}
+
 .username {
-  color: #95deda;
+  color: var(--username-color);
   font-weight: bold;
 }
 
@@ -109,7 +113,6 @@ button {
   scroll-behavior: smooth;
   background-color: #2e2e2e; /* Dark background for chat */
   color: #f5f5f5;
-  white-space: pre-wrap;
 }
 
 /* Input box that docks to the bottom */
@@ -186,4 +189,8 @@ button {
   to {
     transform: rotate(360deg);
   }
+}
+
+.colorPicker {
+  border-style: none;
 }

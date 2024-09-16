@@ -23,14 +23,14 @@ function ChatWindow({ chatOutput, processInput, isLoading }) {
           <div key={index} className="default-text">
             <span
               className={
-                chat.sender === "ChatGPT" ? "chatgpt-name" : "username"
+                chat.sender === "ChatGPT" ? "default-text" : "username"
               }
             >
-              {chat.sender !== "ChatGPT" && (
-                <span className="username">{chat.sender}</span>
-              )}
+              <MarkdownRenderer
+                className="markdown-text"
+                markdownText={chat.message}
+              />
             </span>{" "}
-            <MarkdownRenderer markdownText={chat.message} />
           </div>
         ))}
         {isLoading && (
