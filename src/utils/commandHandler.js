@@ -28,7 +28,7 @@ const sleep = () => {
 };
 
 const printGameState = () => {
-  return JSON.stringify(getGameState(), null, 1);
+  return JSON.stringify(getGameState());
 };
 
 // Main command handler, return true if it was a command

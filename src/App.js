@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+// App.js
+
+import React, { useState, useEffect } from "react";
 import Sidebar from "./components/Sidebar";
 import ChatWindow from "./components/ChatWindow";
 import { handleCommand } from "./utils/commandHandler";
@@ -11,10 +13,13 @@ function App() {
   const [model, setModel] = useState("");
   const [models, setModels] = useState([]);
   const [chatOutput, setChatOutput] = useState([]);
-  const [totalCost, setTotalCost] = useState(0);
+  const [conversationHistory, setConversationHistory] = useState([
+    { role: "system", content: systemPrompt },
+  ]);
+  const [summaries, setSummaries] = useState([]);
 
   // Fetch models when API key changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (apiKey) {
       fetchModels(apiKey);
     }
@@ -34,10 +39,10 @@ function App() {
       // Set models in state
       setModels(modelList);
 
-      // Check if "gpt-4o-mini" is available, and set it as the default if so
-      const defaultModel = modelList.find((m) => m.id === "gpt-4o-mini");
+      // Check if "gpt-4" is available, and set it as the default if so
+      const defaultModel = modelList.find((m) => m.id === "gpt-4");
       if (defaultModel) {
-        setModel("gpt-4o-mini");
+        setModel("gpt-4");
       }
     } catch (error) {
       console.error("Error fetching models:", error);
@@ -54,22 +59,85 @@ function App() {
     }
 
     // Otherwise, proceed with sending the message to ChatGPT
-    sendMessage(userInput);
+    const assistantReply = await sendMessage(userInput);
+
+    // Ensure assistantReply is not null or undefined
+    if (assistantReply) {
+      // Request a summary of the assistant's reply
+      const summary = await sendMessage(assistantReply, {
+        isSummaryRequest: true,
+      });
+
+      // Store the summary separately
+      if (summary) {
+        setSummaries((prev) => [...prev, summary]);
+      }
+    }
   };
 
-  const sendMessage = async (userInput) => {
+  const sendMessage = async (userInput, options = {}) => {
+    const { isSummaryRequest = false } = options;
+
     if (!apiKey || !userInput) {
       alert("Please enter your API key and query.");
       return;
     }
 
-    const newChatOutput = [
-      ...chatOutput,
-      { sender: username, message: userInput },
-    ];
-    setChatOutput(newChatOutput);
+    // Determine if we should update the chat output and conversation history
+    const shouldUpdateChat = !isSummaryRequest;
+
+    if (shouldUpdateChat) {
+      // Add the user's message to the conversation history
+      const newHistory = [
+        ...conversationHistory,
+        { role: "user", content: userInput },
+      ];
+      setConversationHistory(newHistory);
+
+      // Update chat output
+      setChatOutput((prev) => [
+        ...prev,
+        { sender: username, message: userInput },
+      ]);
+    }
 
     try {
+      // Before making the API call, construct the messages array with summaries
+      let messages;
+
+      if (isSummaryRequest) {
+        // For summarization requests, use only the assistant's reply
+        const summarizationSystemPrompt =
+          "You are a summarization assistant. Provide a concise summary of the following text, focusing on key events and important information. Do not include unnecessary details.";
+
+        messages = [
+          { role: "system", content: summarizationSystemPrompt },
+          { role: "user", content: userInput },
+        ];
+      } else {
+        // For regular messages, include summaries and recent conversation
+        messages = [];
+
+        // Include system prompt
+        messages.push({ role: "system", content: systemPrompt });
+
+        // Include summaries as a single assistant message
+        if (summaries.length > 0) {
+          const combinedSummaries = summaries.join(" ");
+          messages.push({
+            role: "assistant",
+            content: `Summary of previous conversations: ${combinedSummaries}`,
+          });
+        }
+
+        // Include the last 10 messages from conversation history
+        const recentMessages = conversationHistory.slice(-10); // Last 5 exchanges
+        messages.push(...recentMessages);
+
+        // Add the new user input
+        messages.push({ role: "user", content: userInput });
+      }
+
       const response = await fetch(
         "https://api.openai.com/v1/chat/completions",
         {
@@ -79,11 +147,8 @@ function App() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: model || "gpt-4o-mini",
-            messages: [
-              { role: "system", content: systemPrompt },
-              { role: "user", content: userInput },
-            ],
+            model: model || "gpt-4",
+            messages: messages,
           }),
         }
       );
@@ -93,21 +158,63 @@ function App() {
 
       const assistantMessage =
         result.choices[0]?.message?.content || "No response received.";
-      setChatOutput((prev) => [
-        ...prev,
-        { sender: "ChatGPT", message: assistantMessage },
-      ]);
 
-      // Update cost (Assuming cost per token is 0.0001 as placeholder)
-      const tokensUsed = result.usage.total_tokens;
-      const cost = tokensUsed * 0.0001;
-      setTotalCost((prev) => prev + cost);
+      if (shouldUpdateChat) {
+        // Add the assistant's message to the conversation history
+        const updatedHistory = [
+          ...conversationHistory,
+          { role: "assistant", content: assistantMessage },
+        ];
+        setConversationHistory(updatedHistory);
+
+        // Update chat output
+        setChatOutput((prev) => [
+          ...prev,
+          { sender: "ChatGPT", message: assistantMessage },
+        ]);
+
+        // Check if we need to summarize older messages
+        if (updatedHistory.length > 12) {
+          // Extract messages older than the last 5 exchanges (each exchange is user and assistant)
+          const messagesToSummarize = updatedHistory.slice(1, -10); // Exclude system prompt and recent messages
+
+          // Create a combined text to summarize
+          const textToSummarize = messagesToSummarize
+            .map(
+              (msg) =>
+                `${msg.role === "user" ? "User" : "Assistant"}: ${msg.content}`
+            )
+            .join("\n");
+
+          // Request a summary
+          const summary = await sendMessage(textToSummarize, {
+            isSummaryRequest: true,
+          });
+
+          if (summary) {
+            // Add the new summary to the summaries array
+            setSummaries((prev) => [...prev, summary]);
+
+            // Remove the summarized messages from the conversation history
+            const remainingHistory = [
+              conversationHistory[0], // Keep the system prompt
+              ...updatedHistory.slice(-10),
+            ];
+            setConversationHistory(remainingHistory);
+          }
+        }
+      }
+
+      return assistantMessage;
     } catch (error) {
       console.error("Error during API call:", error);
-      setChatOutput((prev) => [
-        ...prev,
-        { sender: "Error", message: error.message },
-      ]);
+      if (shouldUpdateChat) {
+        setChatOutput((prev) => [
+          ...prev,
+          { sender: "Error", message: error.message },
+        ]);
+      }
+      return null;
     }
   };
 
@@ -121,7 +228,6 @@ function App() {
         model={model}
         setModel={setModel}
         models={models}
-        totalCost={totalCost}
       />
       <ChatWindow processInput={processInput} chatOutput={chatOutput} />
     </div>

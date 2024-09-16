@@ -22,7 +22,7 @@ function ChatWindow({ chatOutput, processInput }) {
             >
               {chat.sender}:
             </span>{" "}
-            <pre>{chat.message}</pre>
+            {chat.message}
           </div>
         ))}
       </div>

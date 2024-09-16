@@ -1,5 +1,5 @@
 // src/components/Sidebar.js
-import React from 'react';
+import React from "react";
 
 function Sidebar({
   apiKey,
@@ -12,7 +12,6 @@ function Sidebar({
   userInput,
   setUserInput,
   sendMessage,
-  totalCost,
 }) {
   return (
     <div className="sidebar">
@@ -47,8 +46,6 @@ function Sidebar({
           </option>
         ))}
       </select>
-
-      <div id="apiCost">Total Cost: ${totalCost.toFixed(4)}</div>
     </div>
   );
 }
