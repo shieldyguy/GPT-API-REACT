@@ -13,7 +13,7 @@ function Sidebar({
   setUserInput,
   sendMessage,
 }) {
-  const [usernameColor, setUsernameColor] = useState("#000000");
+  const [usernameColor, setUsernameColor] = useState("#AA64B1");
 
   function updateUsernameColor(color) {
     document.documentElement.style.setProperty("--username-color", color);
