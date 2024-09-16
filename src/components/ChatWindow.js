@@ -1,5 +1,6 @@
 // src/components/ChatWindow.js
 import React, { useState, useEffect, useRef } from "react";
+import MarkdownRenderer from "./MarkdownRenderer.jsx";
 
 function ChatWindow({ chatOutput, processInput, isLoading }) {
   const [userInput, setUserInput] = useState("");
@@ -25,9 +26,11 @@ function ChatWindow({ chatOutput, processInput, isLoading }) {
                 chat.sender === "ChatGPT" ? "chatgpt-name" : "username"
               }
             >
-              {chat.sender}:
+              {chat.sender !== "ChatGPT" && (
+                <span className="username">{chat.sender}</span>
+              )}
             </span>{" "}
-            {chat.message}
+            <MarkdownRenderer markdownText={chat.message} />
           </div>
         ))}
         {isLoading && (
